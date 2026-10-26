@@ -1,0 +1,229 @@
+<mat-toolbar class="toolbar">
+  <mat-icon>fact_check</mat-icon>
+  <div class="brand">
+    <span class="brand-name">Amaa's Rotating Maps</span>
+    <span class="brand-sub">Map compatibility</span>
+  </div>
+  <span class="spacer"></span>
+  <button
+    mat-stroked-button
+    type="button"
+    (click)="clearResults()"
+    [disabled]="reports().length === 0 || busy()"
+  >
+    <mat-icon>delete_sweep</mat-icon>
+    Clear
+  </button>
+</mat-toolbar>
+
+@if (busy()) {
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+}
+
+<main>
+  <header class="hero">
+    <h1>Is your map compatible with Amaa's Rotating Maps?</h1>
+    <p>
+      Drop one or more custom map <code>.txt</code> files. This checks them against the rules for that room.
+      The files stay in this browser.
+    </p>
+  </header>
+
+  <div class="workspace">
+    <section class="rules" aria-labelledby="rules-heading">
+      <div class="section-heading">
+        <h2 id="rules-heading">Rules</h2>
+        <p>A map has to pass every rule to run in Amaa's Rotating Maps. Fix the listed objects, then check the file again.</p>
+      </div>
+
+      <mat-accordion class="rule-list" multi>
+        @for (rule of rules; track rule.id) {
+          <mat-expansion-panel class="rule-panel" [expanded]="rule.id === 1">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <span class="rule-index">{{ rule.id }}</span>
+                {{ rule.title }}
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <p>{{ rule.checks }}</p>
+            <p class="fix">
+              <mat-icon>build</mat-icon>
+              <span>{{ rule.fix }}</span>
+            </p>
+          </mat-expansion-panel>
+        }
+      </mat-accordion>
+
+      <mat-card class="allowed" appearance="outlined">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>verified</mat-icon>
+          <mat-card-title>Still allowed</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <ul>
+            @for (note of allowedNotes; track note) {
+              <li>{{ note }}</li>
+            }
+          </ul>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <section class="work" aria-labelledby="results-heading">
+      <div
+        class="drop"
+        [class.over]="dragOver()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+      >
+        <mat-icon class="drop-icon">upload_file</mat-icon>
+        <h2>Check your maps</h2>
+        <p>One file or several. Custom map <code>.txt</code> files only.</p>
+        <div class="drop-actions">
+          <input
+            #picker
+            class="file-input"
+            type="file"
+            accept=".txt,text/plain"
+            multiple
+            aria-label="Choose one or more map text files"
+            (change)="onPick(picker.files, picker)"
+          />
+          <button mat-flat-button color="primary" type="button" (click)="picker.click()" [disabled]="busy()">
+            <mat-icon>folder_open</mat-icon>
+            Choose files
+          </button>
+        </div>
+      </div>
+
+      <div class="section-heading">
+        <h2 id="results-heading">Results</h2>
+        @if (reports().length > 0) {
+          <mat-chip-set class="summary" aria-label="Check summary">
+            <mat-chip>{{ reports().length }} files</mat-chip>
+            <mat-chip class="summary-pass">{{ passedCount() }} passed</mat-chip>
+            <mat-chip class="summary-fail">{{ failedCount() }} failed</mat-chip>
+            <mat-chip>{{ issueCount() }} issues</mat-chip>
+          </mat-chip-set>
+        } @else {
+          <p>Results open here, one accordion for each file.</p>
+        }
+      </div>
+
+      @if (reports().length === 0) {
+        <mat-card class="empty" appearance="outlined">
+          <mat-icon>playlist_add_check</mat-icon>
+          <p>No maps checked yet. The pass or fail state, and the objects to fix, will show in this list.</p>
+        </mat-card>
+      } @else {
+        <mat-accordion class="reports" multi>
+          @for (report of reports(); track report.fileName) {
+            <mat-expansion-panel
+              class="report"
+              [class.pass]="report.passed"
+              [class.fail]="!report.passed"
+              [expanded]="!report.passed"
+            >
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <mat-icon class="state">{{ report.passed ? 'check_circle' : 'error' }}</mat-icon>
+                  <span class="badge" [class.pass]="report.passed" [class.fail]="!report.passed">
+                    {{ report.passed ? 'PASS' : 'FAIL' }}
+                  </span>
+                  <span class="file-name">{{ report.fileName }}</span>
+                </mat-panel-title>
+                <mat-panel-description>
+                  <span class="meta">
+                    {{ report.sceneObjects }} objects
+                    @if (!report.passed) {
+                      · {{ report.violations.length }} issues
+                    }
+                  </span>
+                </mat-panel-description>
+              </mat-expansion-panel-header>
+
+              @if (report.passed) {
+                <p class="verdict pass-copy">This map passes the rules for Amaa's Rotating Maps.</p>
+                @if (report.sceneObjects === 0) {
+                  <p class="note">No scene objects were found, so there was nothing that could fail.</p>
+                }
+              } @else {
+                <p class="verdict fail-copy">
+                  This map is not compatible with Amaa's Rotating Maps yet. Open each broken rule, find the object in
+                  the map editor, and apply the fix.
+                </p>
+                <mat-chip-set class="rule-counts" aria-label="Issues per rule">
+                  @for (rule of rules; track rule.id) {
+                    <mat-chip [class.hot]="report.ruleCounts[rule.id] > 0">
+                      Rule {{ rule.id }}: {{ report.ruleCounts[rule.id] }}
+                    </mat-chip>
+                  }
+                </mat-chip-set>
+
+                <mat-accordion class="hit-rules" multi>
+                  @for (rule of rules; track rule.id) {
+                    @if (report.ruleCounts[rule.id] > 0) {
+                      <mat-expansion-panel class="hit-rule" expanded>
+                        <mat-expansion-panel-header>
+                          <mat-panel-title>
+                            <span class="rule-index">{{ rule.id }}</span>
+                            {{ rule.title }}
+                          </mat-panel-title>
+                          <mat-panel-description>
+                            {{ report.ruleCounts[rule.id] }}
+                            {{ report.ruleCounts[rule.id] === 1 ? 'object' : 'objects' }}
+                          </mat-panel-description>
+                        </mat-expansion-panel-header>
+                        <p>{{ rule.checks }}</p>
+                        <p class="fix">
+                          <mat-icon>build</mat-icon>
+                          <span>{{ rule.fix }}</span>
+                        </p>
+                        <div class="table-wrap">
+                          <table>
+                            <caption class="sr-only">
+                              Objects failing {{ rule.title }}
+                            </caption>
+                            <thead>
+                              <tr>
+                                <th>Id</th>
+                                <th>Name</th>
+                                <th>Asset</th>
+                                <th>Scale</th>
+                                <th>Collision</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              @for (hit of hitsFor(report, rule.id); track $index) {
+                                <tr>
+                                  <td data-label="Id">{{ hit.id }}</td>
+                                  <td data-label="Name">{{ displayName(hit.name) }}</td>
+                                  <td data-label="Asset">{{ hit.asset }}</td>
+                                  <td data-label="Scale">{{ hit.scale }}</td>
+                                  <td data-label="Collision">{{ hit.mode }}</td>
+                                </tr>
+                              }
+                            </tbody>
+                          </table>
+                        </div>
+                      </mat-expansion-panel>
+                    }
+                  }
+                </mat-accordion>
+              }
+
+              @if (report.skippedScale > 0) {
+                <p class="note">
+                  {{ report.skippedScale }}
+                  {{ report.skippedScale === 1 ? 'object was' : 'objects were' }}
+                  skipped because the scale could not be read.
+                </p>
+              }
+            </mat-expansion-panel>
+          }
+        </mat-accordion>
+      }
+    </section>
+  </div>
+</main>

@@ -1,0 +1,124 @@
+// Include theming for Angular Material with `mat.theme()`.
+// This Sass mixin will define CSS variables that are used for styling Angular Material
+// components according to the Material 3 design spec.
+// Learn more about theming and how to use it for your application's
+// custom components at https://material.angular.dev/guide/theming
+@use '@angular/material' as mat;
+
+html {
+  height: 100%;
+  color-scheme: dark;
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$green-palette,
+        tertiary: mat.$orange-palette,
+      ),
+      typography: Barlow,
+      density: 0,
+    )
+  );
+
+  // Cloak green, brass, parchment, and dried blood. Corners stay sharp, like a uniform.
+  --mat-sys-surface: #12100e;
+  --mat-sys-surface-container: #1b1814;
+  --mat-sys-surface-container-low: #161310;
+  --mat-sys-surface-container-high: #241f1a;
+  --mat-sys-surface-container-highest: #2c261f;
+  --mat-sys-on-surface: #f4ecdc;
+  --mat-sys-on-surface-variant: #cbbba0;
+  --mat-sys-outline: #8d7344;
+  --mat-sys-outline-variant: #3d3428;
+  --mat-sys-primary: #3e5c45;
+  --mat-sys-on-primary: #f4ecdc;
+  --mat-sys-primary-container: #243228;
+  --mat-sys-on-primary-container: #d7e3d4;
+  --mat-sys-tertiary: #c6a15a;
+  --mat-sys-on-tertiary: #1c1408;
+  --mat-sys-error: #8e2f2f;
+  --mat-sys-on-error: #f8e8e4;
+  --mat-sys-corner-extra-small: 2px;
+  --mat-sys-corner-small: 2px;
+  --mat-sys-corner-medium: 4px;
+  --mat-sys-corner-large: 6px;
+  --mat-sys-corner-extra-large: 8px;
+}
+
+html,
+body {
+  background-color: #100e0c;
+  background-image: linear-gradient(180deg, #1c1612 0%, #101410 58%, #140e0e 100%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+}
+
+body {
+  color-scheme: dark;
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+  margin: 0;
+  min-height: 100%;
+}
+
+.mc-snack-pass {
+  --mat-snack-bar-container-color: #1c2b22;
+  --mat-snack-bar-supporting-text-color: #e4efe2;
+  --mat-snack-bar-button-color: #c6a15a;
+}
+
+.mc-snack-fail {
+  --mat-snack-bar-container-color: #3a1717;
+  --mat-snack-bar-supporting-text-color: #f6e4df;
+  --mat-snack-bar-button-color: #e7c7c0;
+}
+
+.mc-snack-note {
+  --mat-snack-bar-container-color: #2a2216;
+  --mat-snack-bar-supporting-text-color: #f4ecdc;
+  --mat-snack-bar-button-color: #c6a15a;
+}
+
+.mat-expansion-panel {
+  border: 1px solid #3d3428;
+}
+
+@media (max-width: 960px) {
+  .mat-toolbar-single-row.toolbar {
+    height: auto;
+    white-space: normal;
+  }
+
+  .mat-expansion-panel-header {
+    height: auto;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .mat-expansion-panel-header.mat-expanded {
+    height: auto;
+  }
+
+  .mat-expansion-panel-header .mat-content {
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  .mat-expansion-panel-header-title,
+  .mat-expansion-panel-header-description {
+    flex-basis: auto;
+    white-space: nowrap;
+  }
+
+  .mat-expansion-panel-body {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .mat-mdc-snack-bar-container {
+    margin: 8px;
+  }
+}
+/* You can add global styles to this file, and also import other style files */
