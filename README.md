@@ -30,10 +30,6 @@ The static site is written to `dist/mapcheck-web/browser`.
 
 ## GitHub Pages
 
-Build with the repository name as the base href, then publish the `browser` folder:
+The live site is https://amaa4life.github.io/map-checker/.
 
-```bash
-npx ng build --base-href /your-repo/
-```
-
-For a user site at `https://you.github.io/`, keep the default base href of `/`.
+A push to `main` runs `.github/workflows/pages.yml`, which builds with `--base-href /map-checker/` and publishes `dist/mapcheck-web/browser`.
